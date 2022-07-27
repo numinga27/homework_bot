@@ -89,8 +89,7 @@ def parse_status(homework):
 
 
 def check_tokens():
-    """Проверяет доступность переменных окружения,
-       которые необходимы для работы программы."""
+    """Проверяет доступность переменных окружения."""
     test_env = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
     for tokens in test_env:
         if tokens is None:
