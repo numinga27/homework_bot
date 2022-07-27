@@ -74,7 +74,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Получем статус работы!"""
+    """Получем статус работы."""
     homework_name = homework['homework_name']
     if 'homework_name' not in homework:
         logger.error('Нет такого ключа homework_name')
@@ -90,7 +90,7 @@ def parse_status(homework):
 
 def check_tokens():
     """Проверяет доступность переменных окружения,
-        которые необходимы для работы программы."""
+       которые необходимы для работы программы."""
     test_env = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
     for tokens in test_env:
         if tokens is None:
