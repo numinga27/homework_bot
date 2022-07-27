@@ -37,7 +37,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """ Oтправляет сообщение в Telegram чат """
+    """ Oтправляет сообщение в Telegram чат."""
     try:
         message = 'Вам телеграмма!'
         bot.send_message(TELEGRAM_CHAT_ID, text=message)
@@ -60,7 +60,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """ Проверяет ответ API на корректность """
+    """ Проверяет ответ API на корректность."""
     if not isinstance(response, dict):
         raise TypeError('Неверный тип данных!')
     if not isinstance(response.get('homeworks'), list):
@@ -74,7 +74,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """ Получем статус работы! """
+    """ Получем статус работы!"""
     homework_name = homework['homework_name']
     if 'homework_name' not in homework:
         logger.error('Нет такого ключа homework_name')
