@@ -1,0 +1,2 @@
+class WeHaveAPromblem(Exception):
+    pass
