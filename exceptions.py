@@ -1,2 +1,3 @@
-class WeHaveAPromblem(Exception):
+class ExceptionIsThrown(Exception):
+    """Собственное исключение"""
     pass

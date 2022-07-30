@@ -7,7 +7,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-from exceptions import WeHaveAPromblem
+from exceptions import ExceptionIsThrown
 
 
 load_dotenv()
@@ -45,7 +45,7 @@ def send_message(bot, message):
         logger.info('Сообщение отправлено')
     except telegram.error.TelegramError:
         logger.error('Ошибка при отправке сообщения')
-        raise WeHaveAPromblem('Что пошло не так :(')
+        raise ExceptionIsThrown('Что пошло не так :(')
 
 
 def get_api_answer(current_timestamp):
@@ -56,12 +56,12 @@ def get_api_answer(current_timestamp):
         response_json = requests.get(ENDPOINT, headers=HEADERS, params=params)
     except requests.ConnectionError:
         logger.error(' запрос не сработал')
-        raise WeHaveAPromblem('Что пошло не так :(')
+        raise ExceptionIsThrown('Что пошло не так :(')
     try:
         response = response_json.json()
     except Exception as error:
         logger.error(f'Неудалось преобразовать{error}')
-        raise WeHaveAPromblem('Что пошло не так :(')
+        raise ExceptionIsThrown('Что пошло не так :(')
     if response_json.status_code != 200:
         logger.error('API-сервис не доступен')
         raise Exception('Ошибка при запросе к основному API')
@@ -88,9 +88,9 @@ def parse_status(homework):
     """Получем статус работы."""
     if 'homework_name' not in homework:
         logger.error('Нет такого ключа homework_name')
-    homework_status = homework['status']
     if 'status' not in homework:
         logger.error('Нет такого ключа status')
+    homework_status = homework['status']
     homework_name = homework['homework_name']
     verdict = HOMEWORK_STATUSES.get(homework_status)
     if not verdict:
@@ -117,14 +117,23 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                send_message(bot, message)
+                old_message = message
+                if old_message != message:
+                    send_message(bot, message)
+                else:
+                    logger.info(f'Одинаковые сообщения {message}')
                 current_timestamp = response['current_date']
             else:
-                logger.error('домашек нет')
+                logger.info('домашек нет')
             time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            send_message(bot, message)
+            same_message = message
+            if same_message != message:
+                logger.info(f'{message}')
+                send_message(bot, message)
+            else:
+                logger.info(f'Одинаковые сообщения {message}')
         finally:
             time.sleep(RETRY_TIME)
 
