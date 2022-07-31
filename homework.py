@@ -8,7 +8,7 @@ import telegram
 from dotenv import load_dotenv
 
 from exceptions import ExceptionIsThrown
-
+from http import HTTPStatus
 
 load_dotenv()
 
@@ -53,18 +53,19 @@ def get_api_answer(current_timestamp):
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
-        response_json = requests.get(ENDPOINT, headers=HEADERS, params=params)
+        json_response = requests.get(
+            ENDPOINT, headers=HEADERS, params=params)
+        if json_response.status_code != HTTPStatus.OK:
+            logger.error('API-сервис не доступен')
+            raise Exception('Ошибка при запросе к основному API')
     except requests.ConnectionError:
         logger.error(' запрос не сработал')
         raise ExceptionIsThrown('Что пошло не так :(')
     try:
-        response = response_json.json()
+        response = json_response.json()
     except Exception as error:
         logger.error(f'Неудалось преобразовать{error}')
         raise ExceptionIsThrown('Что пошло не так :(')
-    if response_json.status_code != 200:
-        logger.error('API-сервис не доступен')
-        raise Exception('Ошибка при запросе к основному API')
 
     return response
 
@@ -73,14 +74,14 @@ def check_response(response):
     """Проверяет ответ API на корректность."""
     if not isinstance(response, dict):
         raise TypeError('Неверный тип данных!')
+    if 'homeworks' not in response:
+        raise TypeError('В сроваре нету ключа homeworks')
+    if 'current_date' not in response:
+        raise TypeError('В словаре нету ключа current_date')
     homeworks = response.get('homeworks')
     if not isinstance(homeworks, list):
         raise TypeError('В словаре нету ключа homeworks!')
-    if 'current_date' not in response:
-        raise TypeError('В словаре нету ключа current_date')
-    if 'homeworks' not in response:
-        raise TypeError('В сроваре нету ключа homeworks')
-
+    
     return homeworks
 
 
@@ -117,7 +118,8 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                old_message = message
+                time.sleep(RETRY_TIME)
+                old_message = parse_status(homeworks[0])
                 if old_message != message:
                     send_message(bot, message)
                 else:
@@ -125,9 +127,9 @@ def main():
                 current_timestamp = response['current_date']
             else:
                 logger.info('домашек нет')
-            time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
+            time.sleep(RETRY_TIME)
             same_message = message
             if same_message != message:
                 logger.info(f'{message}')
