@@ -81,7 +81,7 @@ def check_response(response):
     homeworks = response.get('homeworks')
     if not isinstance(homeworks, list):
         raise TypeError('В словаре нету ключа homeworks!')
-    
+
     return homeworks
 
 
