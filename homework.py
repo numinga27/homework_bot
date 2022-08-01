@@ -109,6 +109,7 @@ def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    old_message = ''
     if not check_tokens():
         logger.critical('Токены отсутствуют')
         sys.exit(0)
@@ -118,10 +119,9 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                time.sleep(RETRY_TIME)
-                old_message = parse_status(homeworks[0])
                 if old_message != message:
                     send_message(bot, message)
+                    old_message = message
                 else:
                     logger.info(f'Одинаковые сообщения {message}')
                 current_timestamp = response['current_date']
@@ -129,11 +129,10 @@ def main():
                 logger.info('домашек нет')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            time.sleep(RETRY_TIME)
-            same_message = message
-            if same_message != message:
+            if old_message != message:
                 logger.info(f'{message}')
                 send_message(bot, message)
+                old_message = message
             else:
                 logger.info(f'Одинаковые сообщения {message}')
         finally:
