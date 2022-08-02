@@ -75,12 +75,12 @@ def check_response(response):
     if not isinstance(response, dict):
         raise TypeError('Неверный тип данных!')
     if 'homeworks' not in response:
-        raise TypeError('В сроваре нету ключа homeworks')
+        raise KeyError('В сроваре нету ключа homeworks')
     if 'current_date' not in response:
-        raise TypeError('В словаре нету ключа current_date')
+        raise KeyError('В словаре нету ключа current_date')
     homeworks = response.get('homeworks')
     if not isinstance(homeworks, list):
-        raise TypeError('В словаре нету ключа homeworks!')
+        raise TypeError('Домашки приходят в виде списка')
 
     return homeworks
 
@@ -89,8 +89,10 @@ def parse_status(homework):
     """Получем статус работы."""
     if 'homework_name' not in homework:
         logger.error('Нет такого ключа homework_name')
+        raise KeyError('Нет ключа homework_name')
     if 'status' not in homework:
         logger.error('Нет такого ключа status')
+        raise KeyError('Нет ключа status')
     homework_status = homework['status']
     homework_name = homework['homework_name']
     verdict = HOMEWORK_STATUSES.get(homework_status)
@@ -123,18 +125,17 @@ def main():
                     send_message(bot, message)
                     old_message = message
                 else:
-                    logger.info(f'Одинаковые сообщения {message}')
+                    logger.error(f'Одинаковые сообщения {message}')
                 current_timestamp = response['current_date']
             else:
                 logger.info('домашек нет')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             if old_message != message:
-                logger.info(f'{message}')
                 send_message(bot, message)
                 old_message = message
             else:
-                logger.info(f'Одинаковые сообщения {message}')
+                logger.error(f'Одинаковые сообщения {message}')
         finally:
             time.sleep(RETRY_TIME)
 
