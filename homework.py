@@ -44,7 +44,6 @@ def send_message(bot, message):
         bot.send_message(TELEGRAM_CHAT_ID, text=message)
         logger.info('Сообщение отправлено')
     except telegram.error.TelegramError:
-        logger.error('Ошибка при отправке сообщения')
         raise ExceptionIsThrown('Что пошло не так :(')
 
 
@@ -132,6 +131,7 @@ def main():
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             if old_message != message:
+                logger.error(f'{message}')
                 send_message(bot, message)
                 old_message = message
             else:
